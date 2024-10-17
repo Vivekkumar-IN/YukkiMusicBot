@@ -64,13 +64,13 @@ async def playmode_(client, message: Message, _):
             return await message.reply_text(_["cplay_5"])
 
         try:
-            user_status = await app.get_chat_member(chat.id, message.from_user.id)
+            user = await app.get_chat_member(chat.id, message.from_user.id)
         except:
             return await message.reply_text(_["cplay_4"])
 
-        if user_status.status != ChatMemberStatus.OWNER:
+        if user.status != ChatMemberStatus.OWNER:
             return await message.reply_text(
-                _["cplay_6"].format(chat.title, user_status.user.username)
+                _["cplay_6"].format(chat.title, user.user.username)
             )
 
         await set_cmode(message.chat.id, chat.id)
