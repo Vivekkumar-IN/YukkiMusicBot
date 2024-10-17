@@ -9,7 +9,7 @@
 
 from pyrogram import filters
 from pyrogram.types import Message
-from pyrogram.enums import ChatMemberStatus, ChatMembersFilter
+from pyrogram.enums import ChatMemberStatus, ChatMembersFilter, ChatType
 
 from config import BANNED_USERS
 from strings import get_command
@@ -19,7 +19,6 @@ from YukkiMusic.utils.decorators.admins import AdminActual
 
 ### Multi-Lang Commands
 CHANNELPLAY_COMMAND = get_command("CHANNELPLAY_COMMAND")
-
 
 @app.on_message(
     filters.command(CHANNELPLAY_COMMAND)
@@ -35,10 +34,13 @@ async def playmode_(client, message: Message, _):
                 message.chat.title, CHANNELPLAY_COMMAND[0]
             )
         )
+
     query = message.text.split(None, 2)[1].lower().strip()
+
     if (str(query)).lower() == "disable":
         await set_cmode(message.chat.id, None)
         return await message.reply_text("Channel Play Disabled")
+
     elif str(query) == "linked":
         chat = await app.get_chat(message.chat.id)
         if chat.linked_chat:
@@ -51,27 +53,26 @@ async def playmode_(client, message: Message, _):
             )
         else:
             return await message.reply_text(_["cplay_2"])
+
     else:
         try:
             chat = await app.get_chat(query)
         except:
             return await message.reply_text(_["cplay_4"])
-        if chat.type != "channel":
+
+        if chat.type != ChatType.CHANNEL:
             return await message.reply_text(_["cplay_5"])
+
         try:
-            adminis = []
-            async for m in app.get_chat_members(chat.id, filter=ChatMembersFilter.ADMINISTRATORS):
-                adminis.append(m)
+            user_status = await app.get_chat_member(chat.id, message.from_user.id)
         except:
             return await message.reply_text(_["cplay_4"])
-        for users in admins:
-            if users.status == ChatMemberStatus.OWNER:
-                creatorusername = users.user.username
-                creatorid = users.user.id
-        if creatorid != message.from_user.id:
+
+        if user_status.status != ChatMemberStatus.OWNER:
             return await message.reply_text(
-                _["cplay_6"].format(chat.title, creatorusername)
+                _["cplay_6"].format(chat.title, user_status.user.username)
             )
+
         await set_cmode(message.chat.id, chat.id)
         return await message.reply_text(
             _["cplay_3"].format(chat.title, chat.id)
