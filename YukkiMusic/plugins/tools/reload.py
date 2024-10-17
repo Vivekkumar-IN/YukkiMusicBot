@@ -110,8 +110,8 @@ async def close_menu(_, CallbackQuery):
 )
 @ActualAdminCB
 async def stop_download(client, CallbackQuery: CallbackQuery, _):
-    message_id = CallbackQuery.message.message_id
-    task = lyrical.get(message_id)
+    id = CallbackQuery.message.id
+    task = lyrical.get(id)
     if not task:
         return await CallbackQuery.answer(
             "Downloading already Completed.", show_alert=True
@@ -125,7 +125,7 @@ async def stop_download(client, CallbackQuery: CallbackQuery, _):
         try:
             task.cancel()
             try:
-                lyrical.pop(message_id)
+                lyrical.pop(id)
             except:
                 pass
             await CallbackQuery.answer(
